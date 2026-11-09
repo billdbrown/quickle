@@ -1,6 +1,6 @@
 # Quickle
 
-Four words a day, one guess each. Each word comes with one or two clue rows (guesses already
+Five words a day, one guess each. Each word comes with one or two clue rows (guesses already
 made, coloured green/yellow/grey) chosen so that exactly one common word fits. Any real word that
 fits every clue counts as a win.
 

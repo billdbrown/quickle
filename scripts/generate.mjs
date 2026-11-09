@@ -1,4 +1,4 @@
-// Makes site/days.json: four puzzles a day. Each is an answer plus one or two clue rows that leave
+// Makes site/days.json: five puzzles a day (day 1 had four). Each is an answer plus one or two clue rows that leave
 // exactly one possible answer among common words.
 //
 //   node scripts/generate.mjs [days=730] [start=2026-11-09]
@@ -16,6 +16,7 @@ const START = process.argv[3] || "2026-11-09";
 //   want:    "easy" picks clues showing the most coloured tiles, "hard" the fewest.
 const SLOTS = [
   { len: 4, min: 3.8, want: "easy" },
+  { len: 5, min: 3.8, want: "easy" },
   { len: 5, min: 3.6, want: "medium" },
   { len: 5, min: 3.2, want: "hard" },
   { len: (d) => (d % 2 ? 7 : 6), min: 3.3, want: "medium" },

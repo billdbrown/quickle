@@ -47,12 +47,16 @@ export function loadWords(path = new URL("../data/words.tsv", import.meta.url)) 
   return words;
 }
 
+// The profanity list has base words, not every inflection ("fuckers" got through as a clue).
+// Any word starting with one of these is rude; stems like "cock" or "butt" aren't (cockpit, button).
+const RUDE_STEMS = ["fuck", "shit", "cunt", "bitch", "whore", "slut", "twat", "piss", "nigg", "fagg", "dildo", "rapist"];
+
 /** Words kept out of answers and clues: flagged in words.tsv, or listed in data/exclude.txt. */
 export function loadExcluded() {
   const out = new Set();
   for (const line of readFileSync(new URL("../data/words.tsv", import.meta.url), "utf8").split("\n")) {
     const [w, , flag] = line.split("\t");
-    if (flag && flag.trim()) out.add(w);
+    if ((flag && flag.trim()) || RUDE_STEMS.some((r) => w.startsWith(r))) out.add(w);
   }
   for (const line of readFileSync(new URL("../data/exclude.txt", import.meta.url), "utf8").split("\n")) {
     if (line.startsWith("#")) continue;

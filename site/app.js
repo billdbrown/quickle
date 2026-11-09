@@ -1,4 +1,4 @@
-// Quickle: four words a day, one guess each. No framework, no build.
+// Quickle: five words a day (the first day had four), one guess each. No framework, no build.
 "use strict";
 
 const $ = (id) => document.getElementById(id);
@@ -104,7 +104,7 @@ function render(reveal = false) {
   const p = state.puzzles[i], res = state.progress.results[i];
   const len = p.answer.length;
   document.documentElement.style.setProperty("--len", len);
-  $("label").textContent = `${i + 1} of 4 · ${len} letters`;
+  $("label").textContent = `${i + 1} of ${state.puzzles.length} · ${len} letters`;
 
   const prog = $("progress");
   prog.replaceChildren(...state.puzzles.map((_, k) => {
@@ -259,7 +259,7 @@ function tick() {
 function record() {
   const hist = load("quickle.history", {});
   if (!(state.date in hist)) {
-    hist[state.date] = { wins: state.progress.results.filter((r) => r.outcome !== "miss").length, ms: state.progress.finished - state.progress.started };
+    hist[state.date] = { wins: state.progress.results.filter((r) => r.outcome !== "miss").length, of: state.puzzles.length, ms: state.progress.finished - state.progress.started };
     save("quickle.history", hist);
   }
   return hist;
@@ -272,7 +272,8 @@ function showDone() {
   const res = state.progress.results;
   const wins = res.filter((r) => r.outcome !== "miss").length;
   const ms = state.progress.finished - state.progress.started;
-  $("doneTitle").textContent = ["Tough one.", "One out of four.", "Two out of four.", "Three out of four!", "All four!"][wins];
+  const n = state.puzzles.length, num = ["none", "One", "Two", "Three", "Four", "Five"];
+  $("doneTitle").textContent = wins === 0 ? "Tough one." : wins === n ? `All ${num[n].toLowerCase()}!` : `${num[wins]} out of ${num[n].toLowerCase()}${wins === n - 1 ? "!" : "."}`;
 
   $("results").replaceChildren(...state.puzzles.map((p, k) => {
     const r = res[k], d = document.createElement("div");
@@ -286,9 +287,9 @@ function showDone() {
   let streak = 0;
   for (let d = new Date(state.date + "T12:00:00"); hist[localDate(d)]; d = new Date(d - DAY_MS)) streak++;
   const days = Object.values(hist);
-  const perfect = days.filter((h) => h.wins === 4).length;
+  const perfect = days.filter((h) => h.wins === (h.of || 4)).length;
   $("stats").innerHTML = [
-    [fmt(ms), "time"], [streak, streak === 1 ? "day streak" : "days streak"], [days.length, "played"], [perfect, "all four"],
+    [fmt(ms), "time"], [streak, streak === 1 ? "day streak" : "days streak"], [days.length, "played"], [perfect, "perfect"],
   ].map(([v, l]) => `<div><b>${v}</b><span>${l}</span></div>`).join("");
 
   $("share").onclick = async () => {
