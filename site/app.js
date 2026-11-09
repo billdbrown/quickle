@@ -135,24 +135,44 @@ function render(reveal = false) {
   }
   board.append(yours);
 
+  const hinted = hints().includes(i);
+  $("hint").hidden = !!res || hinted;
   if (res) {
-    $("message").innerHTML = res.outcome === "exact" ? "Got it."
+    $("message").innerHTML = res.outcome === "exact" ? (res.hint ? "Got it, with a hint." : "Got it.")
       : res.outcome === "fits" ? `That fits too! We had <b>${p.answer.toUpperCase()}</b> in mind.`
       : `Not this time. It was <b>${p.answer.toUpperCase()}</b>.`;
     $("next").hidden = false;
     $("next").textContent = i === state.puzzles.length - 1 ? "See results" : "Next word";
   } else {
-    $("message").textContent = "";
+    const h = hintAt(p);
+    $("message").innerHTML = hinted ? `Hint: letter ${h + 1} is <b>${p.answer[h].toUpperCase()}</b>.` : "";
     $("next").hidden = true;
   }
-  keyboard(p, res);
+  keyboard(p, res, hinted ? p.answer[hintAt(p)] : null);
+}
+
+// ---- Hints: one per word. Tells you a letter you don't know yet, in its place.
+const hints = () => state.progress.hints || [];
+/** The first position the clues haven't fixed, preferring a letter that hasn't shown up at all. */
+function hintAt(p) {
+  const fixed = new Set(), seen = new Set();
+  for (const c of p.clues) score(c, p.answer).forEach((m, k) => { if (m === 2) fixed.add(k); if (m) seen.add(c[k]); });
+  const open = [...p.answer].map((_, k) => k).filter((k) => !fixed.has(k));
+  return open.find((k) => !seen.has(p.answer[k])) ?? open[0];
+}
+function useHint() {
+  if (state.busy || state.progress.results[state.view]) return;
+  state.progress.hints = [...hints(), state.view];
+  save(key(), state.progress);
+  render();
 }
 
 // ---- Keyboard, coloured by what the clues already tell you.
 const ROWS = ["qwertyuiop", "asdfghjkl", "+zxcvbnm-"];
-function keyboard(p, res) {
+function keyboard(p, res, hinted) {
   const best = {};
   for (const c of p.clues) score(c, p.answer).forEach((m, k) => { best[c[k]] = Math.max(best[c[k]] ?? -1, m); });
+  if (hinted) best[hinted] = 2;
   const kb = $("keyboard");
   kb.replaceChildren(...ROWS.map((r) => {
     const div = document.createElement("div");
@@ -194,7 +214,7 @@ async function submit() {
   // Any real word that fits every clue counts: the clues are the whole puzzle.
   const fits = p.clues.every((c) => same(score(c, guess), score(c, p.answer)));
   const outcome = guess === p.answer ? "exact" : fits ? "fits" : "miss";
-  state.progress.results.push({ guess, outcome });
+  state.progress.results.push({ guess, outcome, hint: hints().includes(state.view) });
   if (current() >= state.puzzles.length) state.progress.finished = Date.now();
   save(key(), state.progress);
   state.typed = "";
@@ -256,9 +276,9 @@ function showDone() {
 
   $("results").replaceChildren(...state.puzzles.map((p, k) => {
     const r = res[k], d = document.createElement("div");
-    d.className = "result " + (r.outcome === "miss" ? "miss" : "win");
+    d.className = "result " + (r.outcome === "miss" ? "miss" : "win") + (r.hint ? " hinted" : "");
     d.innerHTML = `<span class="mark">${r.outcome === "miss" ? "✕" : "✓"}</span><span class="word">${p.answer.toUpperCase()}</span>` +
-      (r.outcome === "fits" ? `<span class="note">you said ${r.guess.toUpperCase()}, which fits</span>` : r.outcome === "miss" ? `<span class="note">you said ${r.guess.toUpperCase()}</span>` : "");
+      (r.outcome === "fits" ? `<span class="note">you said ${r.guess.toUpperCase()}, which fits${r.hint ? ", with a hint" : ""}</span>` : r.hint && r.outcome !== "miss" ? `<span class="note">with a hint</span>` : r.outcome === "miss" ? `<span class="note">you said ${r.guess.toUpperCase()}</span>` : "");
     return d;
   }));
 
@@ -272,7 +292,7 @@ function showDone() {
   ].map(([v, l]) => `<div><b>${v}</b><span>${l}</span></div>`).join("");
 
   $("share").onclick = async () => {
-    const text = `Quickle #${state.number + 1} ${res.map((r) => (r.outcome === "miss" ? "🟥" : "🟩")).join("")} ${fmt(ms)}\n${location.origin}`;
+    const text = `Quickle #${state.number + 1} ${res.map((r) => (r.outcome === "miss" ? "🟥" : r.hint ? "🟨" : "🟩")).join("")} ${fmt(ms)}\n${location.origin}`;
     try {
       if (navigator.share && matchMedia("(pointer: coarse)").matches) await navigator.share({ text });
       else { await navigator.clipboard.writeText(text); toast("Copied"); }
@@ -292,6 +312,7 @@ function countdown() {
 // ---- Wiring
 $("play").onclick = startGame;
 $("next").onclick = next;
+$("hint").onclick = useHint;
 $("help").onclick = () => $("helpDialog").showModal();
 $("contrast").onclick = () => save("quickle.contrast", document.body.classList.toggle("contrast"));
 $("keyboard").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) press(b.dataset.key); });

@@ -6,7 +6,7 @@
 // Append-only: existing days are never changed, so run it again with a bigger number to extend.
 // Delete site/days.json to start over (only before anyone has played).
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { score, code, loadWords, loadExcluded, inflected, rng } from "./lib.mjs";
+import { score, code, loadWords, loadExcluded, inflected, rng, givesAway } from "./lib.mjs";
 
 const DAYS = Number(process.argv[2] || 730);
 const START = process.argv[3] || "2026-11-09";
@@ -61,12 +61,13 @@ function clueSets(answer, random) {
     rows.push({ g, s, c, greens: s.filter((x) => x === 2).length, left });
   }
   const sets = [];
-  for (const r of rows) if (r.left.length === 1) sets.push({ clues: [r.g], tiles: r.c, greens: r.greens, firstLeft: 1 });
+  for (const r of rows) if (r.left.length === 1 && !givesAway([r], answer)) sets.push({ clues: [r.g], tiles: r.c, greens: r.greens, firstLeft: 1 });
   // Pairs: a first row that narrows to a handful, then a second that settles it.
   const firsts = rows.filter((r) => r.left.length >= 2 && r.left.length <= 25).slice(0, 60);
   for (const a of firsts) {
     for (const b of rows) {
       if (b.g === a.g || b.left.length === 1) continue;
+      if (givesAway([a, b], answer)) continue;
       if (a.left.every((w) => w === answer || !b.left.includes(w))) {
         sets.push({ clues: [a.g, b.g], tiles: a.c + b.c, greens: a.greens + b.greens, firstLeft: a.left.length });
       }

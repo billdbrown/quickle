@@ -2,7 +2,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { score, code, loadWords, loadExcluded, inflected } from "../scripts/lib.mjs";
+import { score, code, loadWords, loadExcluded, inflected, givesAway } from "../scripts/lib.mjs";
 
 test("the page scores guesses exactly like the generator", () => {
   const src = readFileSync(new URL("../site/app.js", import.meta.url), "utf8");
@@ -30,6 +30,15 @@ test("every puzzle has exactly one common answer, and the answer is a word", () 
       seen.add(answer);
       const fits = pool[answer.length].filter((w) => clues.every((c) => code(c, w) === code(c, answer)));
       assert.deepEqual(fits, [answer], `${answer} <- ${clues}`);
+    }
+  }
+});
+
+test("clues never hand over the word between them (from day 2; day 1 was played as it was)", () => {
+  const { days } = JSON.parse(readFileSync(new URL("../site/days.json", import.meta.url), "utf8"));
+  for (const day of days.slice(1)) {
+    for (const [answer, ...clues] of day) {
+      assert.ok(!givesAway(clues.map((g) => ({ g, s: score(g, answer) })), answer), `${answer} <- ${clues}`);
     }
   }
 });

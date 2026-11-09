@@ -94,3 +94,14 @@ export function rng(seed) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
+
+/**
+ * Do these rows, taken together, hand over the word? Bill's first day: LINK + MOVE made every
+ * letter of MONK green between them. Together the rows may fix at most len-2 positions, and at
+ * least one of the answer's letters must never appear coloured.
+ */
+export function givesAway(rows, answer) {
+  const len = answer.length, fixed = new Set(), seen = new Set();
+  for (const { g, s } of rows) s.forEach((m, i) => { if (m === 2) fixed.add(i); if (m > 0) seen.add(g[i]); });
+  return fixed.size > len - 2 || [...answer].every((ch) => seen.has(ch));
+}
