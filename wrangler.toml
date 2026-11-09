@@ -1,0 +1,11 @@
+name = "quickle"
+compatibility_date = "2026-11-09"
+# Pinned because the API token has no account-level enumerate. Not a credential.
+account_id = "af045bb950d46af2b6aee70965d97f0a"
+
+[assets]
+directory = "site"
+
+[[routes]]
+pattern = "quickle.bill.computer"
+custom_domain = true

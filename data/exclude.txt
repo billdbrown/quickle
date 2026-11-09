@@ -1,0 +1,32 @@
+# Words never used as answers or clue words, though still accepted as guesses.
+# Mostly names whose frequency comes from people and places rather than the word (ENABLE has
+# "chad" and "harry" as ordinary words, but nobody thinks of them that way), plus crude or
+# loaded words the profanity list misses. Add to it freely; then run scripts/generate.mjs.
+
+# Names
+tony jordan kelly jane morgan anna jean maria billy jerry laura terry bobby perry tommy nancy
+ruth brooks jesse geneva dale sally chad joey randy tory jenny beth glen molly kerry devon donna
+jill shawn silva tate vera gloria madonna toby bonnie jess kris leone carmen gill noel regina
+willy benny brit alma erica sheila cory ariel billie wally buffy pandora abigail phoebe shea mina
+tammy christy lulu shelly colleen pooh daphne matilda maxi missy sabine tori britt tyne nelly
+bertha moira shay patsy bree mora wynn dory nellie cate marge carlin linn maud merle tiff alameda
+rhea lacey terra vita viva harry jake alan johnny larry barry gary kevin steve dave eddie freddy
+sammy danny jimmy timmy kenny lenny ronny donny artie archie bernie ernie louie lottie hattie
+mattie jackie franky georgie reggie ricky rocky willie bert eric hank hans otto ivan igor
+boris franz fritz heidi hilda helga gretel olga ingrid marta paula rita tina lisa lena nina
+gina dina edna emma ella elsa erin gwen joan june kate leah lois lucy mary megan nora sara
+tara tess wendy yvonne zoe abby amy ann ellen helen karen susan
+
+# Places and peoples
+danish pacific kashmir toledo kaiser polish swiss dutch french english spanish german roman
+latin greek turkey china japan jersey berlin paris london boston dallas denver austin nevada
+texas india
+
+# Crude, or not fun as an answer
+piss pissed turd crap crappy damn damned fart farts sissy fanny gypsy hooker pimp nazi homo jap
+negro coon spic dyke tranny retard bimbo boobs booby butt butts horny kinky pussy screw sexed
+sucks wank wanker twat prick prat
+
+# Common but awkward as answers
+warner scumbag lang
+troy marc harper cooper
